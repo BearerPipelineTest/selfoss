@@ -4,7 +4,8 @@ $finder = PhpCsFixer\Finder::create()
     ->exclude('assets')
     ->exclude('utils')
     ->in(__DIR__)
-    ->name('*.phtml');
+    ->name('*.phtml')
+    ->name('selfoss');
 
 $rules = [
     '@Symfony' => true,

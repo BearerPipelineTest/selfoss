@@ -304,4 +304,26 @@ class Sources implements \daos\SourcesInterface {
 
         return 0;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRaw() {
+        $stmt = static::$stmt;
+        $sources = $this->database->exec('select * from sources');
+
+        return $stmt::ensureRowTypes($sources, [
+            'id' => DatabaseInterface::PARAM_INT,
+            'tags' => DatabaseInterface::PARAM_CSV,
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function insertRaw(array $sources) {
+        foreach ($sources as $source) {
+            $this->database->insertRaw('sources', ['id', 'title', 'tags', 'filter', 'spout', 'params', 'error', 'lastupdate', 'lastentry'], $source);
+        }
+    }
 }

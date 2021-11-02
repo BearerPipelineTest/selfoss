@@ -32,6 +32,15 @@ interface DatabaseInterface {
     public function insert($query, array $params);
 
     /**
+     * Insert raw table data into given table.
+     *
+     * @param string $table target database table
+     * @param string[] $fields column names
+     * @param array[] $data rows to insert
+     */
+    public function insertRaw($table, array $fields, array $data);
+
+    /**
      * Quote string
      *
      * @param mixed $value

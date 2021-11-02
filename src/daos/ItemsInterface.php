@@ -214,4 +214,18 @@ interface ItemsInterface {
      * @return void
      */
     public function bulkStatusUpdate(array $statuses);
+
+    /**
+     * returns raw items table contents
+     *
+     * @return array[] of all items
+     */
+    public function getRaw();
+
+    /**
+     * inserts raw data into items table
+     *
+     * @param array[] $items
+     */
+    public function insertRaw(array $items);
 }

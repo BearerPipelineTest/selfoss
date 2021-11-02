@@ -738,4 +738,31 @@ class Items implements \daos\ItemsInterface {
             $this->database->commit();
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRaw() {
+        $stmt = static::$stmt;
+        $items = $this->database->exec('select * from items');
+
+        return $stmt::ensureRowTypes($items, [
+            'id' => DatabaseInterface::PARAM_INT,
+            'datetime' => DatabaseInterface::PARAM_DATETIME,
+            'unread' => DatabaseInterface::PARAM_BOOL,
+            'starred' => DatabaseInterface::PARAM_BOOL,
+            'source' => DatabaseInterface::PARAM_INT,
+            'tags' => DatabaseInterface::PARAM_CSV,
+            'updatetime' => DatabaseInterface::PARAM_DATETIME,
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function insertRaw(array $items) {
+        foreach ($items as $item) {
+            $this->database->insertRaw('items', ['id', 'datetime', 'title', 'content', 'thumbnail', 'icon', 'unread', 'starred', 'source', 'uid', 'link', 'updatetime', 'author', 'shared', 'lastseen'], $item);
+        }
+    }
 }

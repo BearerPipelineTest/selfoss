@@ -130,4 +130,18 @@ interface SourcesInterface {
      * @return int id if any record is found
      */
     public function checkIfExists($title, $spout, array $params);
+
+    /**
+     * returns raw sources table contents
+     *
+     * @return array[] of all sources
+     */
+    public function getRaw();
+
+    /**
+     * inserts raw data into sources table
+     *
+     * @param array[] $sources
+     */
+    public function insertRaw(array $sources);
 }
