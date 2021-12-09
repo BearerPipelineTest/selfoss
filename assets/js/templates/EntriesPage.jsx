@@ -103,7 +103,7 @@ function reloadList({ fetchParams, abortController, append = false, waitForSync 
             }
 
             if (error instanceof HttpError && error.response.status === 403) {
-                selfoss.history.push('/sign/in', {
+                selfoss.navigage('/sign/in', {
                     error: selfoss.app._('error_session_expired')
                 });
                 return;
@@ -613,13 +613,6 @@ export default class StateHolder extends React.Component {
         return params.category?.startsWith('source-') ? parseInt(params.category.replace(/^source-/, ''), 10) : null;
     }
 
-    getActiveFilter() {
-        if (!this.props.match) {
-            return null;
-        }
-        return this.props.match.params.filter;
-    }
-
     /**
      * Mark all visible items as read
      */
@@ -661,8 +654,8 @@ export default class StateHolder extends React.Component {
         // close opened entry and list
         this.setExpandedEntries({});
 
-        if (ids.length !== 0 && this.props.match.filter === FilterType.UNREAD) {
-            markedEntries = markedEntries.filter(({ id }) => ids.includes(id));
+        if (this.entriesPageMatch.filter === FilterType.UNREAD) {
+            markedEntries = [];
         }
 
         this.setLoadingState(LoadingState.LOADING);
@@ -687,8 +680,10 @@ export default class StateHolder extends React.Component {
                 selfoss.dbOffline.enqueueStatuses(statuses);
             }).catch((error) => {
                 if (error instanceof HttpError && error.response.status === 403) {
-                    selfoss.history.push('/sign/in', {
-                        error: selfoss.app._('error_session_expired')
+                    selfoss.navigate('/sign/in', {
+                        state: {
+                            error: selfoss.app._('error_session_expired'),
+                        },
                     });
                     return;
                 }
@@ -748,8 +743,10 @@ export default class StateHolder extends React.Component {
                 selfoss.dbOffline.enqueueStatus(id, 'unread', !markRead);
             }).catch(function(error) {
                 if (error instanceof HttpError && error.response.status === 403) {
-                    selfoss.history.push('/sign/in', {
-                        error: selfoss.app._('error_session_expired')
+                    selfoss.navigate('/sign/in', {
+                        state: {
+                            error: selfoss.app._('error_session_expired'),
+                        },
                     });
                     return;
                 }
@@ -797,8 +794,10 @@ export default class StateHolder extends React.Component {
                 selfoss.dbOffline.enqueueStatus(id, 'starred', markStarred);
             }).catch(function(error) {
                 if (error instanceof HttpError && error.response.status === 403) {
-                    selfoss.history.push('/sign/in', {
-                        error: selfoss.app._('error_session_expired')
+                    selfoss.navigate('/sign/in', {
+                        state: {
+                            error: selfoss.app._('error_session_expired'),
+                        },
                     });
                     return;
                 }
@@ -815,10 +814,13 @@ export default class StateHolder extends React.Component {
         /**
          * HACK: A counter that is increased every time reload action (r key) is triggered.
          */
-        selfoss.history.replace({
-            ...this.props.location,
-            state: forceReload(this.props.location),
-        });
+        selfoss.navigate(
+            {
+                ...this.props.location,
+                state: forceReload(this.props.location),
+            },
+            { replace: true }
+        );
     }
 
     render() {
@@ -841,7 +843,6 @@ export default class StateHolder extends React.Component {
 }
 
 StateHolder.propTypes = {
-    location: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
     setNavExpanded: PropTypes.func.isRequired,
     navSourcesExpanded: PropTypes.bool.isRequired,

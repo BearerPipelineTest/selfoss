@@ -145,7 +145,7 @@ var selfoss = {
         if (selfoss.hasSession() || !configuration.authEnabled || configuration.publicMode) {
             selfoss.initUi();
         } else {
-            selfoss.history.push('/sign/in');
+            selfoss.navigate('/sign/in');
         }
     },
 
@@ -228,7 +228,7 @@ var selfoss = {
         return login(credentials).then((data) => {
             if (data.success) {
                 selfoss.setSession();
-                selfoss.history.push('/');
+                selfoss.navigate('/');
                 // init offline if supported and not inited yet
                 selfoss.dbOffline.init();
                 selfoss.initUi();
@@ -247,7 +247,7 @@ var selfoss = {
     logout: function() {
         selfoss.clearSession();
         if (!document.body.classList.contains('publicmode')) {
-            selfoss.history.push('/sign/in');
+            selfoss.navigate('/sign/in');
         }
 
         logout().catch((error) => {

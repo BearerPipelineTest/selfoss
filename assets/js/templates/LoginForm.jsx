@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { SpinnerBig } from './Spinner';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LocalizationContext } from '../helpers/i18n';
 
 function handleLogIn({
     event,
-    history,
+    navigate,
     setLoading,
     username,
     password,
@@ -18,10 +18,13 @@ function handleLogIn({
     setLoading(true);
 
     selfoss.login({ username, password, offlineEnabled }).then(() => {
-        history.push('/');
+        navigate('/');
     }).catch(() => {
-        history.replace('/sign/in', {
-            error: selfoss.app._('login_invalid_credentials')
+        navigate('/sign/in', {
+            replace: true,
+            state: {
+                error: selfoss.app._('login_invalid_credentials'),
+            },
         });
     }).finally(() => {
         setLoading(false);
@@ -36,7 +39,7 @@ export default function LoginForm({
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
 
-    const history = useHistory();
+    const navigate = useNavigate();
     const location = useLocation();
     const error = location?.state?.error;
 
@@ -44,13 +47,13 @@ export default function LoginForm({
         (event) =>
             handleLogIn({
                 event,
-                history,
+                navigate,
                 setLoading,
                 username,
                 password,
                 offlineEnabled
             }),
-        [history, username, password, offlineEnabled]
+        [navigate, username, password, offlineEnabled]
     );
 
     const usernameOnChange = React.useCallback(

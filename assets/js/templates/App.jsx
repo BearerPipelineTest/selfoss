@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import nullable from 'prop-types-nullable';
 import {
     BrowserRouter as Router,
-    Switch,
+    Routes,
     Route,
-    Redirect,
-    useHistory,
+    Navigate,
     useLocation,
-    useRouteMatch,
+    useMatch,
+    useNavigate,
 } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Collapse from '@kunukn/react-collapse';
@@ -140,10 +140,15 @@ function PureApp({
     }, []);
 
     // TODO: move stuff that depends on this to the App.
-    const history = useHistory();
+    const navigate = useNavigate();
     React.useEffect(() => {
-        selfoss.history = history;
-    }, [history]);
+        selfoss.navigate = navigate;
+    }, [navigate]);
+
+    const entriesPageMatch = useMatch(ENTRIES_ROUTE_PATTERN);
+    React.useEffect(() => {
+        selfoss.entriesPageMatch = entriesPageMatch;
+    }, [entriesPageMatch]);
 
     // Prepare path of the homepage for redirecting from /
     let homePagePath = selfoss.config.homepage.split('/');
@@ -174,91 +179,83 @@ function PureApp({
         <React.Fragment>
             <Message message={globalMessage} />
 
-            <Switch>
-                <Route path="/sign/in">
-                    {/* menu open for smartphone */}
-                    <div id="loginform" role="main">
-                        <LoginForm
-                            {...{offlineEnabled, setOfflineEnabled}}
-                        />
-                    </div>
-                </Route>
-
-                <Route path="/">
-                    <div id="nav-mobile" role="navigation">
-                        <div id="nav-mobile-logo">
-                            <div id="nav-mobile-count" className={classNames({'unread-count': true, offline: offlineState, online: !offlineState, unread: unreadItemsCount > 0})}>
-                                <span className={classNames({'offline-count': true, offline: offlineState, online: !offlineState, diff: unreadItemsCount !== unreadItemsOfflineCount && unreadItemsOfflineCount})}>{unreadItemsOfflineCount > 0 ? unreadItemsOfflineCount : ''}</span>
-                                <span className="count">{unreadItemsCount}</span>
-                            </div>
-                        </div>
-                        <button
-                            id="nav-mobile-settings"
-                            accessKey="t"
-                            aria-label={_('settingsbutton')}
-                            onClick={menuButtonOnClick}
-                        >
-                            <FontAwesomeIcon icon={icons.menu} size="2x" />
-                        </button>
-                    </div>
-
-                    {/* navigation */}
-                    <Collapse isOpen={!smartphone || navExpanded} className="collapse-css-transition">
-                        <div id="nav" role="navigation">
-                            <Navigation
-                                entriesPage={entriesPage}
-                                setNavExpanded={setNavExpanded}
-                                navSourcesExpanded={navSourcesExpanded}
-                                setNavSourcesExpanded={setNavSourcesExpanded}
-                                offlineState={offlineState}
-                                allItemsCount={allItemsCount}
-                                allItemsOfflineCount={allItemsOfflineCount}
-                                unreadItemsCount={unreadItemsCount}
-                                unreadItemsOfflineCount={unreadItemsOfflineCount}
-                                starredItemsCount={starredItemsCount}
-                                starredItemsOfflineCount={starredItemsOfflineCount}
-                                sourcesState={sourcesState}
-                                setSourcesState={setSourcesState}
-                                sources={sources}
-                                setSources={setSources}
-                                tags={tags}
-                                reloadAll={reloadAll}
+            <Routes>
+                <Route
+                    path="/sign/in"
+                    element={
+                        /* menu open for smartphone */
+                        <div id="loginform" role="main">
+                            <LoginForm
+                                {...{offlineEnabled, setOfflineEnabled}}
                             />
                         </div>
-                    </Collapse>
+                    }
+                />
 
-                    <ul id="search-list">
-                        <SearchList />
-                    </ul>
+                <Route
+                    path="/"
+                    element={
+                        <React.Fragment>
+                            <div id="nav-mobile" role="navigation">
+                                <div id="nav-mobile-logo">
+                                    <div id="nav-mobile-count" className={classNames({'unread-count': true, offline: offlineState, online: !offlineState, unread: unreadItemsCount > 0})}>
+                                        <span className={classNames({'offline-count': true, offline: offlineState, online: !offlineState, diff: unreadItemsCount !== unreadItemsOfflineCount && unreadItemsOfflineCount})}>{unreadItemsOfflineCount > 0 ? unreadItemsOfflineCount : ''}</span>
+                                        <span className="count">{unreadItemsCount}</span>
+                                    </div>
+                                </div>
+                                <button
+                                    id="nav-mobile-settings"
+                                    accessKey="t"
+                                    aria-label={_('settingsbutton')}
+                                    onClick={menuButtonOnClick}
+                                >
+                                    <FontAwesomeIcon icon={icons.menu} size="2x" />
+                                </button>
+                            </div>
 
-                    {/* content */}
-                    <div id="content" role="main">
-                        <Switch>
-                            <Route exact path="/">
-                                <Redirect to={`/${homePagePath.join('/')}`} />
-                            </Route>
-                            <Route path={ENTRIES_ROUTE_PATTERN}>
-                                {(routeProps) => (
-                                    <EntriesPage
-                                        {...routeProps}
-                                        ref={entriesRef}
+                            {/* navigation */}
+                            <Collapse isOpen={!smartphone || navExpanded} className="collapse-css-transition">
+                                <div id="nav" role="navigation">
+                                    <Navigation
+                                        entriesPage={entriesPage}
                                         setNavExpanded={setNavExpanded}
                                         navSourcesExpanded={navSourcesExpanded}
-                                        setTitle={setTitle}
+                                        setNavSourcesExpanded={setNavSourcesExpanded}
+                                        offlineState={offlineState}
+                                        allItemsCount={allItemsCount}
+                                        allItemsOfflineCount={allItemsOfflineCount}
                                         unreadItemsCount={unreadItemsCount}
+                                        unreadItemsOfflineCount={unreadItemsOfflineCount}
+                                        starredItemsCount={starredItemsCount}
+                                        starredItemsOfflineCount={starredItemsOfflineCount}
+                                        sourcesState={sourcesState}
+                                        setSourcesState={setSourcesState}
+                                        sources={sources}
+                                        setSources={setSources}
+                                        tags={tags}
+                                        reloadAll={reloadAll}
                                     />
-                                )}
-                            </Route>
-                            <Route path="/manage/sources">
-                                <SourcesPage />
-                            </Route>
-                            <Route path="*">
-                                <NotFound />
-                            </Route>
-                        </Switch>
-                    </div>
-                </Route>
-            </Switch>
+                                    <Route
+                                        /* TODO: regex pattern does not work https://github.com/remix-run/react-router/issues/8254 */
+                                        path={ENTRIES_ROUTE_PATTERN}
+                                        element={
+                                            <EntriesPage
+                                                ref={entriesRef}
+                                                setNavExpanded={setNavExpanded}
+                                                navSourcesExpanded={navSourcesExpanded}
+                                                setTitle={setTitle}
+                                                unreadItemsCount={unreadItemsCount}
+                                            />
+                                        }
+                                    />
+                                    <Route path="/manage/sources" element={<SourcesPage />} />
+                                    <Route path="*" element={<NotFound />} />
+                                </Routes>
+                            </div>
+                        </React.Fragment>
+                    }
+                />
+            </Routes>
         </React.Fragment>
     );
 }
