@@ -3,6 +3,7 @@
 use Dice\Dice;
 use helpers\Configuration;
 use helpers\DatabaseConnection;
+use function helpers\sendError;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\NullHandler;
@@ -10,9 +11,11 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 require __DIR__ . '/constants.php';
+require_once __DIR__ . '/helpers/responses.php';
 
 $autoloader = @include BASEDIR . '/vendor/autoload.php'; // we will show custom error
 if ($autoloader === false) {
+    header('Content-type: text/plain');
     echo 'The PHP dependencies are missing. Did you run `composer install` in the selfoss directory?';
     exit;
 }
@@ -83,8 +86,7 @@ $dice->addRule(daos\SourcesInterface::class, $shared);
 $dice->addRule(daos\TagsInterface::class, $shared);
 
 if ($configuration->isChanged('dbSocket') && $configuration->isChanged('dbHost')) {
-    echo 'You cannot set both `db_socket` and `db_host` options.' . PHP_EOL;
-    exit;
+    sendError('You cannot set both `db_socket` and `db_host` options.' . PHP_EOL);
 }
 
 // Database connection
@@ -231,8 +233,7 @@ if ($configuration->loggerLevel === 'NONE') {
     } elseif ($logger_destination === 'error_log') {
         $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $configuration->loggerLevel);
     } else {
-        echo 'The `logger_destination` option needs to be either `error_log` or a file path prefixed by `file:`.';
-        exit;
+        sendError('The `logger_destination` option needs to be either `error_log` or a file path prefixed by `file:`.');
     }
 
     $formatter = new LineFormatter(null, null, true, true);
