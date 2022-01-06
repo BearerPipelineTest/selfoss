@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation, useParams } from 'react-router-dom';
 import { useStateWithDeps } from 'use-state-with-deps';
@@ -140,7 +141,7 @@ function handleRefreshSource({ event, source, setLoadingState, setNavExpanded, r
     });
 }
 
-export function EntriesPage({ entries, hasMore, loadingState, setLoadingState, selectedEntry, expandedEntries, setNavExpanded, navSourcesExpanded, reload }) {
+export function EntriesPage({ entries, hasMore, loadingState, setLoadingState, selectedEntry, expandedEntries, setNavExpanded, navSourcesExpanded, reload, unreadItemsCount, setTitle }) {
     const allowedToUpdate = !selfoss.config.authEnabled || selfoss.config.allowPublicUpdate || selfoss.loggedin.value;
 
     const location = useLocation();
@@ -150,6 +151,18 @@ export function EntriesPage({ entries, hasMore, loadingState, setLoadingState, s
 
         return queryString.get('search') ?? '';
     }, [location.search]);
+
+    useEffect(() => {
+        if (unreadItemsCount > 0) {
+            setTitle(selfoss.htmlTitle + ' (' + unreadItemsCount + ')');
+        } else {
+            setTitle(selfoss.htmlTitle);
+        }
+
+        return () => {
+            setTitle(null);
+        };
+    }, [setTitle, unreadItemsCount]);
 
     const params = useParams();
     const currentTag = params.category?.startsWith('tag-') ? params.category.replace(/^tag-/, '') : null;
@@ -366,6 +379,8 @@ EntriesPage.propTypes = {
     setNavExpanded: PropTypes.func.isRequired,
     navSourcesExpanded: PropTypes.bool.isRequired,
     reload: PropTypes.func.isRequired,
+    setTitle: PropTypes.func.isRequired,
+    unreadItemsCount: PropTypes.number.isRequired,
 };
 
 const initialState = {
@@ -818,6 +833,8 @@ export default class StateHolder extends React.Component {
                 setNavExpanded={this.props.setNavExpanded}
                 navSourcesExpanded={this.props.navSourcesExpanded}
                 reload={this.reload}
+                setTitle={this.props.setTitle}
+                unreadItemsCount={this.props.unreadItemsCount}
             />
         );
     }
@@ -828,4 +845,6 @@ StateHolder.propTypes = {
     match: PropTypes.object.isRequired,
     setNavExpanded: PropTypes.func.isRequired,
     navSourcesExpanded: PropTypes.bool.isRequired,
+    setTitle: PropTypes.func.isRequired,
+    unreadItemsCount: PropTypes.number.isRequired,
 };

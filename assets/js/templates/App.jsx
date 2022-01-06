@@ -164,14 +164,9 @@ function PureApp({
         []
     );
 
-    const isEntriesRoute = useRouteMatch(ENTRIES_ROUTE_PATTERN) !== null;
-    React.useEffect(() => {
-        if (isEntriesRoute && unreadItemsCount > 0) {
-            document.title = selfoss.htmlTitle + ' (' + unreadItemsCount + ')';
-        } else {
-            document.title = selfoss.htmlTitle;
-        }
-    }, [unreadItemsCount, isEntriesRoute]);
+    const setTitle = React.useCallback((title) => {
+        document.title = title ?? selfoss.htmlTitle;
+    }, []);
 
     const _ = React.useContext(LocalizationContext);
 
@@ -249,6 +244,8 @@ function PureApp({
                                         ref={entriesRef}
                                         setNavExpanded={setNavExpanded}
                                         navSourcesExpanded={navSourcesExpanded}
+                                        setTitle={setTitle}
+                                        unreadItemsCount={unreadItemsCount}
                                     />
                                 )}
                             </Route>
