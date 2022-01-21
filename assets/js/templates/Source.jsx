@@ -177,7 +177,6 @@ function handleEdit({ event, source, tagInfo, setEditedSource }) {
                 id: tagInfo[name]?.id,
                 name,
                 color: tagInfo[name]?.color,
-                foregroundColor: tagInfo[name]?.foregroundColor
             }))
             : [];
 
@@ -259,11 +258,14 @@ function Tag({ classNames, removeButtonText, onDelete, tag }) {
             className={classNames.selectedTag}
             title={removeButtonText}
             onClick={onDelete}
-            style={{
-                backgroundColor: tag.color,
-                color: tag.foregroundColor,
-            }}
         >
+            <span
+                className="color"
+                style={{
+                    backgroundColor: tag.color,
+                }}
+            />
+            {' '}
             <span className={classNames.selectedTagName}>{tag.name}</span>
         </button>
     );
