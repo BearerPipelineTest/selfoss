@@ -78,6 +78,27 @@ function loadSources({ abortController, setSpouts, setSources, setLoadingState }
     });
 }
 
+
+/**
+ * Get dark OR bright color depending the color contrast.
+ *
+ * @param {string} color color (hex) value
+ * @param {string} darkColor dark color value
+ * @param {string} brightColor bright color value
+ *
+ * @return {string} dark OR bright color value
+ *
+ * @see https://24ways.org/2010/calculating-color-contrast/
+ */
+function getContrastYiq(hexcolor, darkColor = '#555', brightColor = '#eee') {
+    const r = parseInt(hexcolor.substr(1 + 0, 2), 16);
+    const g = parseInt(hexcolor.substr(1 + 2, 2), 16);
+    const b = parseInt(hexcolor.substr(1 + 4, 2), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? darkColor : brightColor;
+}
+
+
 export default function SourcesPage({ tags }) {
     const [spouts, setSpouts] = React.useState([]);
     const [sources, setSources] = React.useState([]);
@@ -86,10 +107,12 @@ export default function SourcesPage({ tags }) {
             let maxTagId = 1;
             let info = {};
 
-            tags.forEach(({ tag }) => {
+            tags.forEach(({ tag, color }) => {
                 if (typeof info[tag] === 'undefined') {
                     info[tag] = {
                         id: maxTagId++,
+                        color,
+                        foregroundColor: getContrastYiq(color.substr()),
                     };
                 }
             });
