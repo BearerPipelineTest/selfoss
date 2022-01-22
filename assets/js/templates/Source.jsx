@@ -489,6 +489,7 @@ function SourceEditForm({
                     onDelete={tagsOnDelete}
                     onAddition={tagsOnAddition}
                     allowNew={true}
+                    addOnBlur={true}
                     minQueryLength={1}
                     placeholderText={_('source_tags_placeholder')}
                     removeButtonText={_('source_tag_remove_button_label')}
